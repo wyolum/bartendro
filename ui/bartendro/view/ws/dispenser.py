@@ -15,6 +15,9 @@ from bartendro.router.driver import MOTOR_DIRECTION_FORWARD, MOTOR_DIRECTION_BAC
 
 log = logging.getLogger('bartendro')
 
+@app.route('/ws/my_test/<int:my_arg>/my_word')
+def my_test(my_arg):
+    return 'this is a test!!! %d' % my_arg
 
 @app.route('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(disp):
