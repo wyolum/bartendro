@@ -14,7 +14,7 @@
         <div class="row-fluid">
              <div class="span12">
                 <span class="shotbot-text">
-                Now serving 
+                Now serving
                 {% if options.metric %}
                     {{ options.shot_size }} ml
                 {% else %}

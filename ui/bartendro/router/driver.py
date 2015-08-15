@@ -17,7 +17,7 @@ DISPENSER_DEFAULT_VERSION_SOFTWARE_ONLY = 3
 BAUD_RATE       = 9600
 DEFAULT_TIMEOUT = 2 # in seconds
 
-MAX_DISPENSERS = 15
+MAX_DISPENSERS = 3 #15 
 SHOT_TICKS     = 20
 
 RAW_PACKET_SIZE      = 10
@@ -143,7 +143,7 @@ class RouterDriver(object):
                                      bytesize=serial.EIGHTBITS, 
                                      parity=serial.PARITY_NONE, 
                                      stopbits=serial.STOPBITS_ONE,
-                                     timeout=.01)
+                                     timeout=2)
         except serial.serialutil.SerialException, e:
             raise SerialIOError(e)
 
@@ -244,9 +244,11 @@ class RouterDriver(object):
         if self.software_only: return True
         return self._send_packet32(dispenser, PACKET_PING, 0)
 
-    def start(self, dispenser):
+    def start(self, dispenser, speed=255):
         if self.software_only: return True
-        return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
+        if speed < 0: speed = 0
+        if speed > 255: speed = 255
+        return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, speed, True)
 
     def set_motor_direction(self, dispenser, direction):
         if self.software_only: return True

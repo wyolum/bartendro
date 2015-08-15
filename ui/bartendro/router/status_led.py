@@ -5,6 +5,7 @@ import logging
 from time import sleep
 try:
     import RPi.GPIO as gpio
+    gpio.setwarnings(False)
     gpio_missing = 0
 except ImportError, e:
     if e.message != 'No module named RPi.GPIO':

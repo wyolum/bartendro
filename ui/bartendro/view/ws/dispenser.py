@@ -15,9 +15,23 @@ from bartendro.router.driver import MOTOR_DIRECTION_FORWARD, MOTOR_DIRECTION_BAC
 
 log = logging.getLogger('bartendro')
 
-@app.route('/ws/my_test/<int:my_arg>/my_word')
-def my_test(my_arg):
-    return 'this is a test!!! %d' % my_arg
+@app.route('/ws/my_test')
+def my_test():
+    import time
+    disp = 1
+    err = ""
+    msg = ""
+    if not app.driver.start(disp - 1):
+        err = "Failed to start dispenser %d" % disp
+        log.error(err)
+    else:
+        for i in range(20):
+            msg += "%d\n" % app.driver.get_saved_tick_count(disp - 1)
+        if not app.driver.stop(disp - 1):
+            err = "\nFailed to stop dispenser %d\n" % disp
+            log.error(err)
+            msg += err
+    return '<PRE> %s </PRE>' % msg
 
 @app.route('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(disp):
