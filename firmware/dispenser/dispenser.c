@@ -38,6 +38,9 @@
 // this (non volatile) variable keeps the current liquid level
 static uint16_t g_liquid_level = 0;
 
+// this keeps the number of the last hall effect sensor
+static volatile uint8_t g_last_hall = 0xff;
+
 volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
@@ -169,6 +172,7 @@ ISR(PCINT0_vect)
     if (state != g_hall1)
     {
         g_hall1 = state;
+	g_last_hall = 1;
         g_ticks++;
     }
 
@@ -176,12 +180,14 @@ ISR(PCINT0_vect)
     if (state != g_hall2)
     {
         g_hall2 = state;
+	g_last_hall = 2;
         g_ticks++;
     }
     state = PINB & (1<<PINB2);
     if (state != g_hall3)
     {
         g_hall3 = state;
+	g_last_hall = 3;
         g_ticks++;
     }
     state = (PINB & (1<<PINB7)) ? 0 : 1;
@@ -231,6 +237,7 @@ ISR(PCINT2_vect)
     if (state != g_hall0)
     {
         g_hall0 = state;
+	g_last_hall = 0;
         g_ticks++;
     }
 
@@ -427,6 +434,11 @@ void update_liquid_level(void)
 void get_liquid_level(void)
 {
     send_packet16(PACKET_LIQUID_LEVEL, g_liquid_level, 0);
+}
+
+void get_last_hall(void)
+{
+  send_packet8(PACKET_GET_LAST_HALL, g_last_hall);
 }
 
 void set_motor_direction(uint8_t direction)
@@ -849,6 +861,10 @@ int main(void)
                     case PACKET_LIQUID_LEVEL:
                         get_liquid_level();
                         break;
+
+		    case PACKET_GET_LAST_HALL:
+		        get_last_hall();
+			break;
 
                     case PACKET_UPDATE_LIQUID_LEVEL:
                         update_liquid_level();
