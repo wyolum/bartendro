@@ -20,7 +20,7 @@ logger.info("Heart start up sequence (clear!):")
 router = driver.RouterDriver("/dev/ttyAMA0", software_only);
 router.open()
 logging.info("Found %d dispensers." % router.count())
-if router.count() != 3:
+if router.count() < 2:
     raise ValueError("Only %d of 3 dispensers found" % router.count())
 router.pattern_define(1, 128)
 router.pattern_add_segment(1, 255, 0, 0, 255)
@@ -54,6 +54,7 @@ def align():
 try:
     push = 2
     pull = 0
+    cycles = 0
     while 1:
         try:
             router.dispense_ticks(push, ticks_per_pulse - router.get_saved_tick_count(push) % ticks_per_pulse, speed)
@@ -62,8 +63,10 @@ try:
             time.sleep(.75)
             print router.get_saved_tick_count(push), 
             print router.get_saved_tick_count(pull) 
+            cycles += 1
         except KeyboardInterrupt:
             logging.info("artificial_heart stopped by user.")
+            logging.info("cycled %d times" % cycles)
             break
 finally:
     for i in range(3):
