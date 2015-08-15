@@ -56,6 +56,7 @@ PACKET_PATTERN_ADD_SEGMENT    = 24
 PACKET_PATTERN_FINISH         = 25
 PACKET_SET_MOTOR_DIRECTION    = 26
 PACKET_GET_VERSION            = 27
+PACKET_GET_LAST_HALL          = 28
 PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
@@ -350,6 +351,14 @@ class RouterDriver(object):
                 #self.debug_levels[dispenser] = max(self.debug_levels[dispenser] - 20, 50)
                 #return self.debug_levels[dispenser]
                 #return random.randint(50, 200)
+                return value
+        return -1
+
+    def get_last_hall(self, dispenser):
+        if self.software_only: return 100
+        if self._send_packet8(dispenser, PACKET_GET_LAST_HALL, 0):
+            ack, value, dummy = self._receive_packet8()
+            if ack == PACKET_ACK_OK:
                 return value
         return -1
 
