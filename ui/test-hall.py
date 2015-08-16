@@ -46,7 +46,7 @@ def align():
         except ValueError:
             pass
 try:
-    push = 1
+    push = 2
     while 1:
         try:
             router.dispense_ticks(push, ticks_per_pulse - router.get_saved_tick_count(push) % ticks_per_pulse, speed)

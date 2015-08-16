@@ -22,21 +22,16 @@ router.open()
 logging.info("Found %d dispensers." % router.count())
 if router.count() < 2:
     raise ValueError("Only %d of 3 dispensers found" % router.count())
-router.pattern_define(1, 128)
-router.pattern_add_segment(1, 255, 0, 0, 255)
-router.pattern_add_segment(1, 0, 255, 0, 255)
-router.pattern_add_segment(1, 0, 0, 255, 255)
-router.pattern_finish(1)
-router._send_packet8(1, 128, 0)
-raw_input('return to continue')
+# raw_input('return to continue')
 
 if software_only:
     logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
 logging.info("artificial_heart started")
 
 ticks_per_pulse = 4
-speed = 255
-SLOW = 200
+FAST = 255
+SLOW = 180
+speed = FAST
 
 def align():
     for i in [0, 2]:
@@ -51,18 +46,56 @@ def align():
             print router.get_saved_tick_count(i), target_tick
         except ValueError:
             pass
+
+class Pump:
+    def __init__(self, router, pid):
+        self.router = router
+        self.pid = pid
+        self.last_start = None
+        self.target = self.ticks
+
+    def align(self):
+        for target in range(3, -1, -1):
+            while self.hall != target:
+                self.dispense_ticks(1, SLOW)
+                time.sleep(.5)
+
+    def dispense_ticks(self, n_tick, speed):
+        print n_tick, self.ticks, self.target
+        actual_n_tick = n_tick - (self.ticks - self.target)
+        print '   ', actual_n_tick
+        if actual_n_tick > 0:
+            self.target = self.ticks + actual_n_tick
+            self.router.dispense_ticks(self.pid, actual_n_tick, speed)
+        else:
+            self.target += n_tick 
+        
+    @property
+    def hall(self):
+        return self.router.get_last_hall(self.pid)
+
+    @property
+    def ticks(self):
+        return self.router.get_saved_tick_count(self.pid)
 try:
     push = 2
     pull = 0
     cycles = 0
+    push = Pump(router, push)
+    pull = Pump(router, pull)
+    ## align pumps
+    
+    push.align()
+    pull.align()
+    raw_input('...')
     while 1:
         try:
-            router.dispense_ticks(push, ticks_per_pulse - router.get_saved_tick_count(push) % ticks_per_pulse, speed)
+            push.dispense_ticks(ticks_per_pulse, speed)
             time.sleep(.25)
-            router.dispense_ticks(pull, ticks_per_pulse - router.get_saved_tick_count(pull) % ticks_per_pulse, speed)
+            pull.dispense_ticks(ticks_per_pulse, speed)
             time.sleep(.75)
-            print router.get_saved_tick_count(push), 
-            print router.get_saved_tick_count(pull) 
+            print push.ticks,
+            print pull.ticks
             cycles += 1
         except KeyboardInterrupt:
             logging.info("artificial_heart stopped by user.")
