@@ -357,7 +357,7 @@ class RouterDriver(object):
     def get_last_hall(self, dispenser):
         if self.software_only: return 100
         if self._send_packet8(dispenser, PACKET_GET_LAST_HALL, 0):
-            ack, value, dummy = self._receive_packet8()
+            ack, value = self._receive_packet8()
             if ack == PACKET_ACK_OK:
                 return value
         return -1
