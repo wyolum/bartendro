@@ -4,10 +4,10 @@ OBJ2HEX=avr-objcopy
 TARGET=dispenser
 
 program: $(TARGET).hex 
-	sudo avrdude -p m168 -P usb -c avrispmkII -Uflash:w:$(TARGET).hex -B 1.0
+	 avrdude -p m168 -P COM7 -c stk500v2 -Uflash:w:$(TARGET).hex -B 1.0
 
 fuses:
-	sudo avrdude -p m168 -P usb -c avrispmkII -U lfuse:w:0xe2:m -U hfuse:w:0xd7:m -U efuse:w:0x03:m -B 8
+	 avrdude -p m168 -P COM7 -c stk500v2 -U lfuse:w:0xe2:m -U hfuse:w:0xd7:m -U efuse:w:0x03:m -B 8
 
 dispenser: fuses program
 	./pump.sh
